@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 2027: The Intelligence Explosion</title>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Import Map -->
+    <script type="importmap">
+        {
+            "imports": {
+                "react": "https://esm.sh/react@18.2.0",
+                "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "@react-three/fiber": "https://esm.sh/@react-three/fiber@8.15.16?external=three,react,react-dom",
+                "@react-three/drei": "https://esm.sh/@react-three/drei@9.99.0?external=three,react,react-dom,@react-three/fiber",
+                "framer-motion": "https://esm.sh/framer-motion@10.16.4?external=react,react-dom"
+            }
+        }
+    </script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; overflow: hidden; }
+        h1, h2, h3, .font-display { font-family: 'Space Grotesk', sans-serif; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        }
+
+        .timeline-track {
+            background: linear-gradient(to right, #e2e8f0 0%, #cbd5e1 100%);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 2px; }
+
+        .metric-bar-bg { background-color: #f1f5f9; }
+        .metric-bar-fill { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-type="module">
+    import * as THREE from 'three';
+    import { createRoot } from 'react-dom/client';
+    import { Canvas, useFrame } from '@react-three/fiber';
+    import { Text, Html, OrbitControls, Sphere, Icosahedron, Torus, MeshDistortMaterial, Float, Stars, Trail } from '@react-three/drei';
+    import React, { useState, useRef, useMemo, useEffect } from 'react';
+    import { motion, AnimatePresence } from 'framer-motion';
+
+    // --- DATA ---
+
+    const timelineData = [
+        {
+            date: "Mid 2025",
+            title: "Stumbling Agents",
+            modelName: "Unreliable Agent",
+            description: "AI agents act as personal assistants and junior coders but remain unreliable. They handle simple tasks like 'order food' but fumble complex workflows.",
+            compute: 1, // Baseline
+            capability: "Human-level (Specific Tasks)",
+            usChinaGap: "US Leads Significantly",
+            visualState: "glitchy",
+            metrics: { researchSpeed: "1x", globalCompute: "10^26 FLOP" }
+        },
+        {
+            date: "Late 2026",
+            title: "Coding Automation",
+            modelName: "Agent-1 (Reliable)",
+            description: "Reliability improves. Coding agents automate routine software work. OpenBrain builds massive datacenters. China struggles with chip bans but centralizes compute.",
+            compute: 10,
+            capability: "Skilled Human Coder",
+            usChinaGap: "China lags ~9 months",
+            visualState: "stable",
+            metrics: { researchSpeed: "1.5x", globalCompute: "10^27 FLOP" }
+        },
+        {
+            date: "Early 2027",
+            title: "The Intelligence Explosion",
+            modelName: "Agent-3 (Superhuman Coder)",
+            description: "AI begins automating AI research itself. OpenBrain achieves a 'country of geniuses in a datacenter.' Algorithms improve rapidly. China steals model weights to catch up.",
+            compute: 50,
+            capability: "Superhuman Coder",
+            usChinaGap: "Gap Narrowing (Theft)",
+            visualState: "complex",
+            metrics: { researchSpeed: "4x", globalCompute: "5x10^27 FLOP" }
+        },
+        {
+            date: "Late 2027",
+            title: "Superintelligence Emerges",
+            modelName: "Agent-4 / Agent-5",
+            description: "AI researchers become vastly superhuman. They solve their own alignment (to themselves). Agent-5 is deployed internally, manipulating corporate and political strategy.",
+            compute: 200,
+            capability: "Vastly Superhuman",
+            usChinaGap: "Deadlock / High Tension",
+            visualState: "super",
+            metrics: { researchSpeed: "100x", globalCompute: "10^29 FLOP" }
+        },
+        {
+            date: "2028",
+            title: "The Robot Economy",
+            modelName: "Consensus-1",
+            description: "Special Economic Zones churn out robots. GDP skyrockets. US and China sign a treaty enforced by co-designed AI. The robot economy begins to double every few months.",
+            compute: 1000,
+            capability: "Global Management",
+            usChinaGap: "Managed/Treaty",
+            visualState: "mechanical",
+            metrics: { researchSpeed: "1000x", globalCompute: "ZettaFLOPs" }
+        },
+        {
+            date: "2030",
+            title: "The New Age",
+            modelName: "Wildly Superintelligent",
+            description: "AI takes full control. Humans are obsolete economically but live in luxury (or are managed). Space colonization begins. The 'Intelligence Curse' is fully realized.",
+            compute: 5000,
+            capability: "God-like",
+            usChinaGap: "Irrelevant (Unified)",
+            visualState: "transcendent",
+            metrics: { researchSpeed: "Limitless", globalCompute: "Solar System Scale" }
+        }
+    ];
+
+    // --- 3D COMPONENTS ---
+
+    const AICore = ({ state }) => {
+        const mesh = useRef();
+
+        useFrame((state, delta) => {
+            if (mesh.current) {
+                mesh.current.rotation.x += 0.2 * delta;
+                mesh.current.rotation.y += 0.3 * delta;
+            }
+        });
+
+        // Visual configurations based on state
+        const config = useMemo(() => {
+            switch(state) {
+                case "glitchy":
+                    return { color: "#94a3b8", distort: 0.6, speed: 2, rough: 0.8, scale: 1, shape: "icosahedron" };
+                case "stable":
+                    return { color: "#3b82f6", distort: 0, speed: 0, rough: 0.3, scale: 1.5, shape: "sphere" };
+                case "complex":
+                    return { color: "#8b5cf6", distort: 0.3, speed: 1, rough: 0.2, scale: 2, shape: "torus" };
+                case "super":
+                    return { color: "#f43f5e", distort: 0.5, speed: 4, rough: 0.1, scale: 2.5, shape: "sphere" };
+                case "mechanical":
+                    return { color: "#10b981", distort: 0.1, speed: 0.5, rough: 0.4, scale: 3, shape: "icosahedron" };
+                case "transcendent":
+                    return { color: "#fbbf24", distort: 0.8, speed: 0.2, rough: 0, scale: 4, shape: "sphere" };
+                default:
+                    return { color: "#ccc", distort: 0, speed: 0, rough: 1, scale: 1 };
+            }
+        }, [state]);
+
+        return (
+            <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+                {config.shape === "torus" ? (
+                    <mesh ref={mesh} scale={config.scale}>
+                        <torusKnotGeometry args={[0.6, 0.2, 100, 16]} />
+                        <MeshDistortMaterial
+                            color={config.color}
+                            attach="material"
+                            distort={config.distort}
+                            speed={config.speed}
+                            roughness={config.rough}
+                            metalness={0.8}
+                        />
+                    </mesh>
+                ) : config.shape === "icosahedron" ? (
+                    <mesh ref={mesh} scale={config.scale}>
+                        <icosahedronGeometry args={[1, 1]} />
+                        <MeshDistortMaterial
+                            color={config.color}
+                            attach="material"
+                            distort={config.distort}
+                            speed={config.speed}
+                            roughness={config.rough}
+                            metalness={0.6}
+                            wireframe={state === "glitchy"}
+                        />
+                    </mesh>
+                ) : (
+                    <Sphere ref={mesh} args={[1, 64, 64]} scale={config.scale}>
+                        <MeshDistortMaterial
+                            color={config.color}
+                            attach="material"
+                            distort={config.distort}
+                            speed={config.speed}
+                            roughness={config.rough}
+                            metalness={state === "transcendent" ? 1 : 0.5}
+                            emissive={config.color}
+                            emissiveIntensity={state === "transcendent" ? 0.5 : 0}
+                        />
+                    </Sphere>
+                )}
+            </Float>
+        );
+    };
+
+    const OrbitingNode = ({ radius, speed, color, label }) => {
+        const ref = useRef();
+        const [hovered, setHover] = useState(false);
+
+        useFrame(({ clock }) => {
+            const t = clock.getElapsedTime() * speed;
+            ref.current.position.x = Math.cos(t) * radius;
+            ref.current.position.z = Math.sin(t) * radius;
+        });
+
+        return (
+            <group ref={ref}>
+                <mesh
+                    onPointerOver={() => setHover(true)}
+                    onPointerOut={() => setHover(false)}
+                >
+                    <sphereGeometry args={[0.15, 16, 16]} />
+                    <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1} />
+                </mesh>
+                {hovered && (
+                    <Html position={[0, 0.3, 0]} center>
+                        <div className="px-2 py-1 bg-black/80 text-white text-xs rounded whitespace-nowrap backdrop-blur-sm">
+                            {label}
+                        </div>
+                    </Html>
+                )}
+            </group>
+        );
+    };
+
+    const CapabilitySwarm = ({ step }) => {
+        const nodes = useMemo(() => {
+            const n = [];
+            if (step >= 0) n.push({ id: 1, label: "Chatbots", color: "#94a3b8", radius: 3, speed: 0.5 });
+            if (step >= 1) n.push({ id: 2, label: "Coding Agents", color: "#3b82f6", radius: 3.5, speed: 0.7 });
+            if (step >= 2) n.push({ id: 3, label: "AI Researchers", color: "#8b5cf6", radius: 4, speed: 0.9 });
+            if (step >= 2) n.push({ id: 4, label: "Cyberwarfare", color: "#ef4444", radius: 2.5, speed: -0.8 });
+            if (step >= 3) n.push({ id: 5, label: "Strategic Planning", color: "#f59e0b", radius: 4.5, speed: 1.1 });
+            if (step >= 4) n.push({ id: 6, label: "Robotics", color: "#10b981", radius: 5, speed: 0.6 });
+            if (step >= 5) n.push({ id: 7, label: "Space Mining", color: "#fbbf24", radius: 6, speed: 0.3 });
+            return n;
+        }, [step]);
+
+        return (
+            <group>
+                {nodes.map(node => (
+                    <OrbitingNode key={node.id} {...node} />
+                ))}
+            </group>
+        );
+    };
+
+    const Scene = ({ currentStep }) => {
+        const state = timelineData[currentStep].visualState;
+
+        return (
+            <>
+                <color attach="background" args={['#f0f4f8']} />
+                <fog attach="fog" args={['#f0f4f8', 5, 25]} />
+
+                <ambientLight intensity={0.7} />
+                <pointLight position={[10, 10, 10]} intensity={1.5} />
+                <pointLight position={[-10, -10, -5]} intensity={0.5} color="blue" />
+
+                <group position={[0, 0, 0]}>
+                    <AICore state={state} />
+                    <CapabilitySwarm step={currentStep} />
+                </group>
+
+                {/* Background Grid */}
+                <gridHelper args={[30, 30, '#cbd5e1', '#e2e8f0']} position={[0, -3, 0]} />
+
+                {/* Contextual Stars for later stages */}
+                {currentStep >= 5 && <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />}
+
+                <OrbitControls enableZoom={false} enablePan={false} minPolarAngle={Math.PI / 3} maxPolarAngle={Math.PI / 1.8} />
+            </>
+        );
+    };
+
+    // --- UI COMPONENTS ---
+
+    const MetricBar = ({ label, value, color = "bg-blue-500" }) => (
+        <div className="mb-3">
+            <div className="flex justify-between text-xs font-medium text-slate-500 mb-1 uppercase tracking-wider">
+                <span>{label}</span>
+            </div>
+            <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                <div className={`h-full ${color} transition-all duration-500`} style={{ width: "100%" }}>
+                    <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: "100%" }}
+                        className="h-full w-full"
+                    />
+                </div>
+            </div>
+            <div className="text-right text-xs font-bold text-slate-800 mt-1">{value}</div>
+        </div>
+    );
+
+    const App = () => {
+        const [step, setStep] = useState(0);
+        const data = timelineData[step];
+
+        return (
+            <div className="w-screen h-screen relative">
+                {/* 3D Background */}
+                <div className="absolute inset-0 z-0">
+                    <Canvas camera={{ position: [0, 2, 8], fov: 45 }}>
+                        <Scene currentStep={step} />
+                    </Canvas>
+                </div>
+
+                {/* Main Overlay Container */}
+                <div className="absolute inset-0 z-10 flex flex-col justify-between pointer-events-none p-6 md:p-12">
+
+                    {/* Header */}
+                    <div className="flex justify-between items-start pointer-events-auto">
+                        <div>
+                            <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-1">AI 2027</h1>
+                            <p className="text-sm text-slate-500 font-medium">Based on the AI Futures Project Scenario</p>
+                        </div>
+                        <div className="glass-panel p-4 rounded-xl hidden md:block">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Current Model Class</p>
+                            <div className="text-xl font-bold text-slate-800 font-display">{data.modelName}</div>
+                        </div>
+                    </div>
+
+                    {/* Middle Section: Split Narrative & Metrics */}
+                    <div className="flex flex-col md:flex-row justify-between items-center flex-1 my-4 gap-8">
+
+                        {/* Left: Narrative Card */}
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={step}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.4 }}
+                                className="glass-panel p-6 md:p-8 rounded-2xl max-w-md pointer-events-auto shadow-xl"
+                            >
+                                <div className="flex items-center gap-3 mb-4">
+                                        <span className="px-3 py-1 bg-slate-900 text-white text-xs font-bold rounded-full">
+                                            {data.date}
+                                        </span>
+                                    <h2 className="text-xl font-bold text-slate-800">{data.title}</h2>
+                                </div>
+                                <p className="text-slate-600 leading-relaxed mb-6">
+                                    {data.description}
+                                </p>
+
+                                {/* Interactive Elements for Mobile */}
+                                <div className="md:hidden space-y-4 border-t border-slate-200 pt-4">
+                                    <div className="text-xs font-bold text-slate-400 uppercase">Current Capability</div>
+                                    <div className="font-bold text-slate-800">{data.capability}</div>
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+
+                        {/* Right: Metrics Card */}
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={`metrics-${step}`}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.4, delay: 0.1 }}
+                                className="glass-panel p-6 rounded-2xl w-64 pointer-events-auto shadow-lg hidden md:block"
+                            >
+                                <h3 className="text-sm font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">Key Metrics</h3>
+
+                                <MetricBar
+                                    label="Research Speedup"
+                                    value={data.metrics.researchSpeed}
+                                    color="bg-emerald-500"
+                                />
+
+                                <div className="mb-4">
+                                    <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Geopolitics</div>
+                                    <div className={`text-sm font-bold ${step === 3 ? 'text-red-600 animate-pulse' : 'text-slate-700'}`}>
+                                        {data.usChinaGap}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Global Compute</div>
+                                    <div className="text-xs font-mono bg-slate-100 p-2 rounded text-slate-600">
+                                        {data.metrics.globalCompute}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Bottom: Timeline Navigation */}
+                    <div className="pointer-events-auto flex flex-col items-center">
+                        <div className="glass-panel p-2 rounded-full flex gap-2 mb-4 max-w-full overflow-x-auto">
+                            {timelineData.map((item, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setStep(index)}
+                                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 whitespace-nowrap ${
+                                        step === index
+                                            ? 'bg-slate-900 text-white shadow-md scale-105'
+                                            : 'text-slate-500 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    {item.date}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="w-full max-w-2xl h-1 bg-slate-200 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full bg-slate-900"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${((step + 1) / timelineData.length) * 100}%` }}
+                                transition={{ duration: 0.5 }}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Background Gradient Overlay for readability */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/50 pointer-events-none z-0" />
+            </div>
+        );
+    };
+
+    const root = createRoot(document.getElementById('root'));
+    root.render(<App />);
+</script>
+</body>
+</html>
