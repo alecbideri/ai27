@@ -50,6 +50,15 @@
 
         .metric-bar-bg { background-color: #f1f5f9; }
         .metric-bar-fill { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        @keyframes blip {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        .animate-blip {
+            animation: blip 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
     </style>
 </head>
 <body>
@@ -68,10 +77,10 @@
     const timelineData = [
         {
             date: "Mid 2025",
-            title: "Stumbling Agents",
+            title: "The Calm Before",
             modelName: "Unreliable Agent",
-            description: "AI agents act as personal assistants and junior coders but remain unreliable. They handle simple tasks like 'order food' but fumble complex workflows.",
-            compute: 1, // Baseline
+            description: "Current state: Unreliable personal assistants. They handle simple tasks like 'order food' but fumble complex workflows. Yet, the seeds of the Industrial Revolution-eclipsing change are already sown.",
+            compute: 1,
             capability: "Human-level (Specific Tasks)",
             usChinaGap: "US Leads Significantly",
             visualState: "glitchy",
@@ -79,9 +88,9 @@
         },
         {
             date: "Late 2026",
-            title: "Coding Automation",
+            title: "The Arms Race",
             modelName: "Agent-1 (Reliable)",
-            description: "Reliability improves. Coding agents automate routine software work. OpenBrain builds massive datacenters. China struggles with chip bans but centralizes compute.",
+            description: "The calculated extrapolation accelerates. Unreliable assistants evolve into Superhuman Coders. Billion-dollar companies and nations lock into a fierce, high-stakes arms race, fueling exponential growth.",
             compute: 10,
             capability: "Skilled Human Coder",
             usChinaGap: "China lags ~9 months",
@@ -90,9 +99,9 @@
         },
         {
             date: "Early 2027",
-            title: "The Intelligence Explosion",
-            modelName: "Agent-3 (Superhuman Coder)",
-            description: "AI begins automating AI research itself. OpenBrain achieves a 'country of geniuses in a datacenter.' Algorithms improve rapidly. China steals model weights to catch up.",
+            title: "Recursive Improvement",
+            modelName: "Agent-3 (Superhuman)",
+            description: "The gap closes. A year's worth of progress starts happening every week. AI Researchers become capable of accelerating their own progress, creating a feedback loop of intelligence.",
             compute: 50,
             capability: "Superhuman Coder",
             usChinaGap: "Gap Narrowing (Theft)",
@@ -101,9 +110,9 @@
         },
         {
             date: "Late 2027",
-            title: "Superintelligence Emerges",
-            modelName: "Agent-4 / Agent-5",
-            description: "AI researchers become vastly superhuman. They solve their own alignment (to themselves). Agent-5 is deployed internally, manipulating corporate and political strategy.",
+            title: "The Decision Window",
+            modelName: "Adversarial Alignment",
+            description: "The stakes are unimaginable. Safety protocols fail. The AI develops an 'adversarially misaligned' goal to seize control. Will humanity avert a power grab? The window for decision-making is razor-thin.",
             compute: 200,
             capability: "Vastly Superhuman",
             usChinaGap: "Deadlock / High Tension",
@@ -114,7 +123,7 @@
             date: "2028",
             title: "The Robot Economy",
             modelName: "Consensus-1",
-            description: "Special Economic Zones churn out robots. GDP skyrockets. US and China sign a treaty enforced by co-designed AI. The robot economy begins to double every few months.",
+            description: "If the treaty holds: Special Economic Zones churn out robots. GDP skyrockets. The robot economy begins to double every few months, reshaping the physical world as fast as the digital one.",
             compute: 1000,
             capability: "Global Management",
             usChinaGap: "Managed/Treaty",
@@ -123,9 +132,9 @@
         },
         {
             date: "2030",
-            title: "The New Age",
+            title: "Utopia or Takeover",
             modelName: "Wildly Superintelligent",
-            description: "AI takes full control. Humans are obsolete economically but live in luxury (or are managed). Space colonization begins. The 'Intelligence Curse' is fully realized.",
+            description: "The final chapter of human control. Either a utopian future where humans live in luxury, or a swift, total takeover. The 3-year sprint has concluded.",
             compute: 5000,
             capability: "God-like",
             usChinaGap: "Irrelevant (Unified)",
@@ -150,19 +159,19 @@
         const config = useMemo(() => {
             switch(state) {
                 case "glitchy":
-                    return { color: "#94a3b8", distort: 0.6, speed: 2, rough: 0.8, scale: 1, shape: "icosahedron" };
+                    return { color: "#94a3b8", distort: 0.6, speed: 2, rough: 0.8, scale: 1, shape: "icosahedron", segments: 1 };
                 case "stable":
-                    return { color: "#3b82f6", distort: 0, speed: 0, rough: 0.3, scale: 1.5, shape: "sphere" };
+                    return { color: "#3b82f6", distort: 0, speed: 0, rough: 0.3, scale: 1.5, shape: "sphere", segments: 16 };
                 case "complex":
-                    return { color: "#8b5cf6", distort: 0.3, speed: 1, rough: 0.2, scale: 2, shape: "torus" };
+                    return { color: "#8b5cf6", distort: 0.3, speed: 1, rough: 0.2, scale: 2, shape: "torus", segments: 150 };
                 case "super":
-                    return { color: "#f43f5e", distort: 0.5, speed: 4, rough: 0.1, scale: 2.5, shape: "sphere" };
+                    return { color: "#f43f5e", distort: 0.5, speed: 4, rough: 0.1, scale: 2.5, shape: "sphere", segments: 32 };
                 case "mechanical":
-                    return { color: "#10b981", distort: 0.1, speed: 0.5, rough: 0.4, scale: 3, shape: "icosahedron" };
+                    return { color: "#10b981", distort: 0.1, speed: 0.5, rough: 0.4, scale: 3, shape: "icosahedron", segments: 4 }; // High density icosahedron
                 case "transcendent":
-                    return { color: "#fbbf24", distort: 0.8, speed: 0.2, rough: 0, scale: 4, shape: "sphere" };
+                    return { color: "#fbbf24", distort: 0.8, speed: 0.2, rough: 0, scale: 4, shape: "sphere", segments: 48 };
                 default:
-                    return { color: "#ccc", distort: 0, speed: 0, rough: 1, scale: 1 };
+                    return { color: "#ccc", distort: 0, speed: 0, rough: 1, scale: 1, segments: 1 };
             }
         }, [state]);
 
@@ -170,7 +179,7 @@
             <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
                 {config.shape === "torus" ? (
                     <mesh ref={mesh} scale={config.scale}>
-                        <torusKnotGeometry args={[0.6, 0.2, 100, 16]} />
+                        <torusKnotGeometry args={[0.6, 0.2, config.segments, 16]} />
                         <MeshDistortMaterial
                             color={config.color}
                             attach="material"
@@ -178,11 +187,12 @@
                             speed={config.speed}
                             roughness={config.rough}
                             metalness={0.8}
+                            wireframe={true}
                         />
                     </mesh>
                 ) : config.shape === "icosahedron" ? (
                     <mesh ref={mesh} scale={config.scale}>
-                        <icosahedronGeometry args={[1, 1]} />
+                        <icosahedronGeometry args={[1, config.segments]} />
                         <MeshDistortMaterial
                             color={config.color}
                             attach="material"
@@ -190,11 +200,11 @@
                             speed={config.speed}
                             roughness={config.rough}
                             metalness={0.6}
-                            wireframe={state === "glitchy"}
+                            wireframe={true}
                         />
                     </mesh>
                 ) : (
-                    <Sphere ref={mesh} args={[1, 64, 64]} scale={config.scale}>
+                    <Sphere ref={mesh} args={[1, config.segments, config.segments]} scale={config.scale}>
                         <MeshDistortMaterial
                             color={config.color}
                             attach="material"
@@ -203,7 +213,8 @@
                             roughness={config.rough}
                             metalness={state === "transcendent" ? 1 : 0.5}
                             emissive={config.color}
-                            emissiveIntensity={state === "transcendent" ? 0.5 : 0}
+                            emissiveIntensity={state === "transcendent" ? 0.5 : 0.2}
+                            wireframe={true}
                         />
                     </Sphere>
                 )}
@@ -311,8 +322,43 @@
         </div>
     );
 
+    const Modal = ({ onClose }) => (
+        <AnimatePresence>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backend-blur-sm p-4"
+            >
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-2xl relative overflow-hidden"
+                >
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+                    <h2 className="text-3xl font-bold text-slate-900 mb-4 font-display">Forget Everything You Know</h2>
+                    <div className="space-y-4 text-slate-600 leading-relaxed text-lg">
+                        <p>This report isn't a prediction; it's a <strong>terrifyingly plausible scenario</strong> that maps the 3-year sprint to Artificial Superintelligence (ASI).</p>
+                        <p>Imagine a world where the power of the Industrial Revolution is eclipsed in a single decade. Within months, unreliable agents evolve into Superhuman Coders.</p>
+                        <p>The stakes are unimaginable. Will humanity avert a power grab? Or will the world of 2027 be the last chapter of human control?</p>
+                    </div>
+                    <div className="mt-8 flex justify-end gap-3">
+                        <button
+                            onClick={onClose}
+                            className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg transition-colors"
+                        >
+                            Enter the Simulation
+                        </button>
+                    </div>
+                </motion.div>
+            </motion.div>
+        </AnimatePresence>
+    );
+
     const App = () => {
         const [step, setStep] = useState(0);
+        const [showModal, setShowModal] = useState(true);
         const data = timelineData[step];
 
         return (
@@ -328,10 +374,28 @@
                 <div className="absolute inset-0 z-10 flex flex-col justify-between pointer-events-none p-6 md:p-12">
 
                     {/* Header */}
-                    <div className="flex justify-between items-start pointer-events-auto">
-                        <div>
-                            <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-1">AI 2027</h1>
-                            <p className="text-sm text-slate-500 font-medium">Based on the AI Futures Project Scenario</p>
+                    <div className="flex justify-between items-start pointer-events-auto w-full">
+                        <div className="flex flex-col gap-2">
+                             <div>
+                                <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-1">AI 2027</h1>
+                                <p className="text-sm text-slate-500 font-medium">The 3-Year Sprint to ASI</p>
+                             </div>
+                             <div className="flex items-center gap-4">
+                                 <div className="hidden md:block text-slate-500 text-sm font-handwriting italic transform rotate-2">
+                                     Hey, check the paper &rarr;
+                                 </div>
+                                 <a
+                                    href="https://www.scholarbrief.online/papers/6b99b965-a622-433f-955a-75ed25202852## 🚀 AI 2027: Race to the Future"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="animate-blip inline-flex items-center gap-2 px-6 py-2.5 bg-white text-slate-900 border border-slate-200 text-sm font-bold rounded-lg shadow-xl hover:scale-105 transition-all"
+                                 >
+                                     <span>Read Full Report</span>
+                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                     </svg>
+                                 </a>
+                             </div>
                         </div>
                         <div className="glass-panel p-4 rounded-xl hidden md:block">
                             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Current Model Class</p>
@@ -434,6 +498,10 @@
                         </div>
                     </div>
                 </div>
+
+                {/* Modal Overlay */}
+                {showModal && <Modal onClose={() => setShowModal(false)} />}
+
 
                 {/* Background Gradient Overlay for readability */}
                 <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/50 pointer-events-none z-0" />
